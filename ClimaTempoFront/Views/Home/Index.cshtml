@@ -1,0 +1,168 @@
+﻿
+<div ng-app="myApp" ng-controller="myCtrl">
+    <script>
+        var app = angular.module('myApp', []);
+        app.controller('myCtrl', function($scope, $http) {
+            $scope.apiUrl = 'https://localhost:7261/Home/';
+            $scope.MaisQuentes = [];
+            $scope.MaisFrias = [];
+            $scope.Previsoes = [];
+            $scope.QtdPesquisaHoje = 5;
+            $scope.QtdPesquisaDias = 7;
+            $scope.Cidades = [];
+            $scope.Cidade = {};
+            $scope.ExecuteGetApi = function(action, params, func) {
+                $http.get($scope.apiUrl + action + "?" + params)
+                    .then(function(response) {
+                        func(response);
+                    });
+            };
+            $scope.ListarMaisQuentes = () => {
+                $scope.ExecuteGetApi("ListarMaisQuentes", "Qtd=" + $scope.QtdPesquisaHoje, (result) => {
+                    result = result.data;
+                    if (result.success) {
+                        $scope.MaisQuentes = result.data;
+                    }
+                });
+            }
+
+            $scope.ListarMaisFrias = () => {
+                $scope.ExecuteGetApi("ListarMaisFrias", "Qtd=" + $scope.QtdPesquisaHoje, (result) => {
+                    result = result.data;
+                    if (result.success) {
+                        $scope.MaisFrias = result.data;
+                    }
+                });
+            }
+            $scope.ListarPrevisoes = function() {
+                $scope.ExecuteGetApi("ListarPrevisoes", "Qtd=" + $scope.QtdPesquisaDias + "&IdCidade=" + $scope.Cidade.id, (result) => {
+                    result = result.data;
+                    if (result.success) {
+                        $scope.Previsoes = result.data;
+                    }
+                });
+            };
+            $scope.ListarCidades = () => {
+                $scope.ExecuteGetApi("ListarCidades", "", (result) => {
+                    result = result.data;
+                    if (result.success) {
+                        $scope.Cidades = result.data;
+                    }
+                });
+            }
+            $scope.ListarMaisQuentes();
+            $scope.ListarMaisFrias();
+            $scope.ListarCidades();
+        });
+    </script>
+
+
+    <table border="0" style="width:100%;">
+        <tr>
+            <td class="card">
+                <table border="0" style="width:100%;">
+                    <tr>
+                        <td class="gridHeader">
+                            Cidades mais quentes hoje
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+
+                            <table border="0" style="width:100%;">
+                                <tr ng-repeat="p in MaisQuentes">
+                                    <td style="text-align:left;width:80%">
+                                        {{p.cidade}} - {{p.uf}}
+                                    </td>
+                                    <td style="text-align:right">
+                                        <table border="0" style="width:100%;">
+                                            <tr>
+                                                <td style="text-align:left">
+                                                    Máxima:
+                                                </td>
+                                                <td style="text-align:right">
+                                                    {{p.maxima}} ºC
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+        </tr>
+        <tr>
+            <td class="card">
+                <table border="0" style="width:100%;">
+                    <tr>
+                        <td class="gridHeader">
+                            Cidades mais frias hoje
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <table border="0" style="width:100%;">
+                                <tr ng-repeat="p in MaisFrias">
+                                    <td style="text-align:left;width:80%">
+                                        {{p.cidade}} - {{p.uf}}
+                                    </td>
+                                    <td style="text-align:right">
+                                        <table border="0" style="width:100%;">
+                                            <tr>
+                                                <td style="text-align:left">
+                                                    Máxima:
+                                                </td>
+                                                <td style="text-align:right">
+                                                    {{p.maxima}} ºC
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br />
+    <br />
+    <span>Clima para os próximos {{this.QtdPesquisaDias}} para a cidade de:</span>
+    <div style="width:100%;text-align:center">
+        <select id="drpCidade"
+                name="drpCidade"
+                ng-model="Cidade"
+                chosen="directiveOptions"
+                ng-options="item.nome for item in Cidades"
+                ng-change="ListarPrevisoes()"
+                class="form-control input-sm">
+            <option value=""></option>
+        </select>
+    </div>
+    <br />
+    <br />
+    <table border="0" style="width:100%;" cellpadding="4" cellspacing="4">
+        <tr>
+            <td ng-repeat="p in Previsoes" style="border-radius: 10px; border: 1px solid #DCDCDC; text-align: center;background-color:white">
+                <div>
+                    <div style="background-color: #DCDCDC">
+                        {{p.cidade}}<br />
+                        {{p.data}}<br />
+                        {{p.diaSemana}}<br />
+                    </div>
+                    {{p.clima}}<br />
+                    Mínima: {{p.minima}} ºC<br />
+                    Máxima: {{p.maxima}} ºC
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
